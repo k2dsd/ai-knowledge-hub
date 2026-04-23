@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI产品研发工作流 · 高级PM知识体系</title>
+<style>
+  :root {
+    --bg: #f0f4fb;
+    --bg2: #e8eef8;
+    --surface: #ffffff;
+    --surface2: #f5f8ff;
+    --border: #dde5f4;
+    --shadow: rgba(99,130,200,0.10);
+    --shadow-md: rgba(99,130,200,0.16);
+    --accent: #3b82f6;
+    --accent-light: #eff6ff;
+    --accent2: #6366f1;
+    --accent3: #10b981;
+    --accent3-light: #ecfdf5;
+    --accent4: #f59e0b;
+    --accent5: #ef4444;
+    --text: #1e2a3b;
+    --text-muted: #64748b;
+    --text-dim: #475569;
+    --saas: #3b82f6;
+    --mfg: #10b981;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'PingFang SC','Hiragino Sans GB','Microsoft YaHei',-apple-system,sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── Hero ── */
+  .hero {
+    min-height: 92vh;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center; padding: 80px 20px 60px;
+    background: linear-gradient(150deg, #ffffff 0%, #e8f0fe 50%, #dbeafe 100%);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content:''; position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse 70% 55% at 15% 30%, rgba(59,130,246,0.10) 0%, transparent 65%),
+      radial-gradient(ellipse 55% 45% at 85% 70%, rgba(99,102,241,0.09) 0%, transparent 65%),
+      radial-gradient(ellipse 45% 35% at 50% 95%, rgba(16,185,129,0.07) 0%, transparent 60%);
+    pointer-events:none;
+  }
+  /* floating blobs */
+  .blob {
+    position: absolute; border-radius: 50%;
+    background: rgba(59,130,246,0.08);
+    filter: blur(40px); pointer-events: none;
+  }
+  .blob1 { width:320px;height:320px;top:-80px;right:10%;animation:float 8s ease-in-out infinite; }
+  .blob2 { width:200px;height:200px;bottom:60px;left:5%;animation:float 10s ease-in-out infinite reverse; }
+  .blob3 { width:160px;height:160px;top:30%;left:2%;background:rgba(99,102,241,0.07);animation:float 12s ease-in-out infinite 2s; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+
+  .hero-label {
+    display:inline-block; font-size:12px; font-weight:700;
+    letter-spacing:2.5px; text-transform:uppercase;
+    color: var(--accent); background: rgba(59,130,246,0.08);
+    border:1px solid rgba(59,130,246,0.18);
+    padding:6px 18px; border-radius:20px; margin-bottom:28px;
+    position:relative;
+  }
+  .hero h1 {
+    font-size: clamp(2.2rem,5vw,3.6rem);
+    font-weight:800; letter-spacing:-1px; line-height:1.15;
+    margin-bottom:22px; position:relative; color: var(--text);
+  }
+  .hero h1 .grad {
+    background: linear-gradient(135deg,#3b82f6,#6366f1,#06b6d4);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .hero-sub {
+    font-size:1.05rem; color:var(--text-muted); max-width:600px;
+    margin-bottom:44px; position:relative;
+  }
+  .hero-stats {
+    display:flex; gap:40px; flex-wrap:wrap; justify-content:center; position:relative;
+    margin-bottom:40px;
+  }
+  .hero-stat { text-align:center; }
+  .hero-stat .num {
+    font-size:2rem; font-weight:800;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .hero-stat .label { font-size:12px; color:var(--text-muted); letter-spacing:0.5px; }
+  .hero-cta {
+    display:inline-flex; align-items:center; gap:8px;
+    background:linear-gradient(135deg,#3b82f6,#6366f1);
+    color:#fff; font-weight:600; font-size:14px;
+    padding:12px 28px; border-radius:12px;
+    text-decoration:none; position:relative;
+    box-shadow:0 6px 24px rgba(59,130,246,0.28);
+    transition:transform 0.2s, box-shadow 0.2s;
+  }
+  .hero-cta:hover { transform:translateY(-2px); box-shadow:0 10px 30px rgba(59,130,246,0.36); }
+  .hero-scroll {
+    position:absolute; bottom:28px; left:50%; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    color:var(--text-muted); font-size:12px; animation:bounce 2s infinite;
+  }
+  @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+
+  /* ── Nav ── */
+  .nav {
+    position:sticky; top:0; z-index:100;
+    background:rgba(255,255,255,0.88);
+    backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--border);
+    box-shadow:0 2px 12px var(--shadow);
+  }
+  .nav-inner {
+    display:flex; gap:4px; max-width:1400px; margin:0 auto;
+    padding:12px 24px; white-space:nowrap; overflow-x:auto;
+  }
+  .nav-item {
+    font-size:13px; font-weight:500; color:var(--text-muted);
+    padding:6px 16px; border-radius:8px; cursor:pointer;
+    text-decoration:none; transition:all 0.2s;
+  }
+  .nav-item:hover { color:var(--text); background:var(--surface2); }
+  .nav-item.active { color:var(--accent); background:var(--accent-light); font-weight:600; }
+
+  /* ── Layout ── */
+  .container { max-width:1400px; margin:0 auto; padding:0 24px; }
+  .section { padding:80px 0; }
+  .section-header { margin-bottom:48px; }
+  .section-tag {
+    display:inline-block; font-size:11px; font-weight:700;
+    letter-spacing:2px; text-transform:uppercase; color:var(--accent); margin-bottom:10px;
+  }
+  .section-title { font-size:clamp(1.5rem,3vw,2rem); font-weight:800; margin-bottom:10px; letter-spacing:-0.5px; }
+  .section-desc { color:var(--text-muted); max-width:580px; font-size:15px; }
+
+  /* ── Pipeline ── */
+  .pipeline { position:relative; }
+  .pipeline-line {
+    position:absolute; left:31px; top:0; bottom:0; width:2px;
+    background:linear-gradient(to bottom,#3b82f6,#6366f1,#10b981); opacity:0.2;
+  }
+
+  .stage { position:relative; padding-left:76px; margin-bottom:20px; }
+  .stage-dot {
+    position:absolute; left:20px; top:22px; width:24px; height:24px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:10px; font-weight:700; z-index:1; color:#fff;
+    box-shadow:0 4px 12px rgba(99,130,200,0.3);
+  }
+  .stage-card {
+    background:var(--surface);
+    border:1.5px solid var(--border);
+    border-radius:16px; overflow:hidden;
+    box-shadow:0 2px 12px var(--shadow);
+    transition:border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+  }
+  .stage-card:hover {
+    border-color:rgba(59,130,246,0.3);
+    box-shadow:0 8px 32px var(--shadow-md);
+    transform:translateY(-1px);
+  }
+  .stage-head {
+    padding:22px 26px; cursor:pointer;
+    display:flex; align-items:flex-start; gap:14px; user-select:none;
+  }
+  .stage-icon { font-size:26px; line-height:1; flex-shrink:0; margin-top:2px; }
+  .stage-meta { flex:1; }
+  .stage-num { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:3px; }
+  .stage-name { font-size:1.1rem; font-weight:700; margin-bottom:6px; color:var(--text); }
+  .stage-brief { font-size:13.5px; color:var(--text-muted); }
+  .stage-tags { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+  .tag {
+    font-size:11px; font-weight:500; padding:3px 10px; border-radius:12px;
+    background:var(--surface2); border:1px solid var(--border); color:var(--text-muted);
+  }
+  .tag.saas { background:rgba(59,130,246,0.07); border-color:rgba(59,130,246,0.18); color:#2563eb; }
+  .tag.mfg  { background:rgba(16,185,129,0.07); border-color:rgba(16,185,129,0.18); color:#059669; }
+  .stage-chevron { font-size:12px; color:var(--text-muted); transition:transform 0.3s; flex-shrink:0; margin-top:4px; }
+  .stage-card.open .stage-chevron { transform:rotate(180deg); }
+  .stage-body { display:none; border-top:1.5px solid var(--border); background:var(--surface2); }
+  .stage-card.open .stage-body { display:block; }
+  .stage-body-inner {
+    padding:26px; display:grid; grid-template-columns:1fr 1fr; gap:24px;
+  }
+  @media(max-width:768px){ .stage-body-inner{grid-template-columns:1fr;} }
+
+  .body-col h4 {
+    font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--text-muted); margin-bottom:12px;
+  }
+  .checklist { list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .checklist li { display:flex; gap:9px; font-size:13.5px; color:var(--text-dim); align-items:flex-start; }
+  .checklist li::before { content:'▸'; color:var(--accent); flex-shrink:0; margin-top:1px; font-size:11px; }
+  .checklist li strong { color:var(--text); }
+
+  .tools-grid { display:flex; flex-wrap:wrap; gap:7px; }
+  .tool-chip {
+    font-size:12px; font-weight:500; padding:4px 11px; border-radius:8px;
+    background:#fff; border:1px solid var(--border); color:var(--text-dim);
+    box-shadow:0 1px 4px var(--shadow);
+  }
+  .deliverables { display:flex; flex-direction:column; gap:8px; }
+  .deliverable {
+    display:flex; align-items:center; gap:10px;
+    background:#fff; border:1px solid var(--border); border-radius:10px;
+    padding:9px 14px; font-size:13px; color:var(--text-dim);
+    box-shadow:0 1px 4px var(--shadow);
+  }
+  .deliverable .di { font-size:16px; }
+
+  .alert-box {
+    background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.22);
+    border-left:3px solid var(--accent4); border-radius:10px;
+    padding:12px 16px; font-size:13px; color:var(--text-dim); margin-top:14px;
+  }
+  .alert-box strong { color:#b45309; }
+
+  /* ── Cases ── */
+  .cases-tabs {
+    display:flex; gap:8px; margin-bottom:28px;
+    border-bottom:1.5px solid var(--border); padding-bottom:14px;
+  }
+  .case-tab {
+    font-size:14px; font-weight:600; padding:8px 20px;
+    border-radius:10px; cursor:pointer; transition:all 0.2s;
+    color:var(--text-muted); border:1.5px solid transparent;
+  }
+  .case-tab.saas.active { color:#1d4ed8; background:rgba(59,130,246,0.08); border-color:rgba(59,130,246,0.22); }
+  .case-tab.mfg.active  { color:#065f46; background:rgba(16,185,129,0.08); border-color:rgba(16,185,129,0.22); }
+  .case-tab:hover { background:var(--surface2); }
+  .case-panel { display:none; }
+  .case-panel.active { display:block; }
+
+  .cases-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(400px,1fr)); gap:20px; }
+  @media(max-width:600px){ .cases-grid{grid-template-columns:1fr;} }
+
+  .case-card {
+    background:var(--surface); border:1.5px solid var(--border);
+    border-radius:16px; overflow:hidden;
+    box-shadow:0 2px 14px var(--shadow);
+    transition:border-color 0.3s, transform 0.25s, box-shadow 0.25s;
+  }
+  .case-card:hover { transform:translateY(-3px); box-shadow:0 10px 36px var(--shadow-md); }
+  .case-card.saas:hover { border-color:rgba(59,130,246,0.3); }
+  .case-card.mfg:hover  { border-color:rgba(16,185,129,0.3); }
+
+  .case-header {
+    padding:18px 22px 14px; border-bottom:1px solid var(--border);
+    display:flex; align-items:flex-start; gap:14px;
+    background:linear-gradient(135deg,#fafcff,#f0f6ff);
+  }
+  .case-card.mfg .case-header { background:linear-gradient(135deg,#fafffe,#f0fdf8); }
+  .case-logo {
+    width:42px; height:42px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; flex-shrink:0;
+  }
+  .case-logo.saas { background:rgba(59,130,246,0.1); }
+  .case-logo.mfg  { background:rgba(16,185,129,0.1); }
+  .case-company { font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); margin-bottom:3px; }
+  .case-product { font-size:.95rem; font-weight:700; color:var(--text); }
+  .case-body { padding:18px 22px 22px; }
+  .case-section { margin-bottom:14px; }
+  .case-section:last-child { margin-bottom:0; }
+  .case-label { font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:5px; }
+  .case-label.saas { color:#2563eb; }
+  .case-label.mfg  { color:#059669; }
+  .case-text { font-size:13px; color:var(--text-dim); line-height:1.65; }
+
+  .case-metrics { display:flex; gap:12px; flex-wrap:wrap; margin-top:14px; }
+  .metric {
+    flex:1; min-width:90px; background:var(--surface2);
+    border:1px solid var(--border); border-radius:10px;
+    padding:11px 12px; text-align:center;
+    box-shadow:0 1px 4px var(--shadow);
+  }
+  .metric-val { font-size:1.2rem; font-weight:800; margin-bottom:2px; }
+  .metric-val.saas { color:#2563eb; }
+  .metric-val.mfg  { color:#059669; }
+  .metric-key { font-size:11px; color:var(--text-muted); }
+
+  .case-timeline { display:flex; gap:0; margin-top:14px; overflow-x:auto; padding-bottom:4px; }
+  .tl-step { flex:1; min-width:80px; position:relative; text-align:center; }
+  .tl-step::after { content:''; position:absolute; top:9px; left:50%; right:-50%; height:1.5px; background:var(--border); }
+  .tl-step:last-child::after { display:none; }
+  .tl-dot { width:18px; height:18px; border-radius:50%; margin:0 auto 7px; position:relative; z-index:1; }
+  .tl-dot.saas { background:rgba(59,130,246,0.15); border:2px solid #3b82f6; }
+  .tl-dot.mfg  { background:rgba(16,185,129,0.15); border:2px solid #10b981; }
+  .tl-label { font-size:11px; color:var(--text-muted); line-height:1.4; }
+
+  /* ── Tools Matrix ── */
+  .tools-matrix { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:18px; }
+  .tool-cat {
+    background:var(--surface); border:1.5px solid var(--border);
+    border-radius:14px; padding:20px;
+    box-shadow:0 2px 10px var(--shadow);
+    transition:border-color 0.3s, box-shadow 0.2s, transform 0.2s;
+  }
+  .tool-cat:hover { border-color:rgba(59,130,246,0.25); box-shadow:0 6px 24px var(--shadow-md); transform:translateY(-1px); }
+  .tool-cat-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .tool-cat-icon {
+    width:34px; height:34px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center; font-size:16px;
+    background:var(--accent-light); border:1px solid rgba(59,130,246,0.12);
+  }
+  .tool-cat-name { font-size:14px; font-weight:700; color:var(--text); }
+  .tool-list { display:flex; flex-direction:column; gap:6px; }
+  .tool-item {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:7px 11px; background:var(--surface2); border-radius:8px;
+    border:1px solid var(--border);
+  }
+  .tool-name { font-size:13px; font-weight:500; color:var(--text); }
+  .tool-desc { font-size:11px; color:var(--text-muted); text-align:right; max-width:110px; }
+
+  /* ── Pitfalls ── */
+  .pitfalls-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:18px; }
+  .pitfall-card {
+    background:var(--surface); border:1.5px solid var(--border);
+    border-radius:14px; padding:20px; border-left:3px solid;
+    box-shadow:0 2px 10px var(--shadow);
+    transition:box-shadow 0.2s, transform 0.2s;
+  }
+  .pitfall-card:hover { box-shadow:0 8px 28px var(--shadow-md); transform:translateY(-2px); }
+  .pitfall-card.red    { border-left-color:#ef4444; }
+  .pitfall-card.yellow { border-left-color:#f59e0b; }
+  .pitfall-card.purple { border-left-color:#8b5cf6; }
+  .pitfall-icon { font-size:22px; margin-bottom:10px; }
+  .pitfall-title { font-size:14.5px; font-weight:700; margin-bottom:8px; color:var(--text); }
+  .pitfall-desc { font-size:13px; color:var(--text-dim); margin-bottom:12px; line-height:1.65; }
+  .pitfall-fix {
+    font-size:12.5px; color:#065f46;
+    background:rgba(16,185,129,0.07); border:1px solid rgba(16,185,129,0.18);
+    border-radius:8px; padding:8px 12px;
+  }
+
+  /* ── Roles ── */
+  .roles-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px; }
+  .role-card {
+    background:var(--surface); border:1.5px solid var(--border);
+    border-radius:14px; padding:18px; text-align:center;
+    box-shadow:0 2px 10px var(--shadow);
+    transition:border-color 0.3s, transform 0.2s, box-shadow 0.2s;
+  }
+  .role-card:hover { border-color:rgba(59,130,246,0.28); transform:translateY(-2px); box-shadow:0 8px 26px var(--shadow-md); }
+  .role-icon { font-size:28px; margin-bottom:8px; }
+  .role-title { font-size:13.5px; font-weight:700; margin-bottom:5px; color:var(--text); }
+  .role-resp { font-size:12px; color:var(--text-muted); line-height:1.5; }
+
+  /* ── KPI Table ── */
+  .kpi-table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  .kpi-table th {
+    text-align:left; padding:11px 15px;
+    background:linear-gradient(135deg,#f0f6ff,#e8f0fe);
+    border:1px solid var(--border); color:var(--text-muted);
+    font-size:11.5px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+  }
+  .kpi-table td {
+    padding:11px 15px; border:1px solid var(--border); color:var(--text-dim);
+    background:var(--surface); vertical-align:top;
+  }
+  .kpi-table tr:hover td { background:var(--surface2); }
+  .kpi-badge {
+    display:inline-block; font-size:11px; font-weight:600;
+    padding:2px 9px; border-radius:10px; margin-bottom:2px;
+  }
+  .kpi-badge.tech { background:rgba(59,130,246,0.1); color:#1d4ed8; }
+  .kpi-badge.biz  { background:rgba(16,185,129,0.1); color:#065f46; }
+  .kpi-badge.ux   { background:rgba(139,92,246,0.1); color:#6d28d9; }
+
+  /* ── Divider ── */
+  .divider { height:1px; background:linear-gradient(to right,transparent,var(--border),transparent); }
+
+  /* ── Section BG alternation ── */
+  .section.alt { background:var(--surface); }
+
+  /* ── Footer ── */
+  .footer {
+    padding:44px 24px; text-align:center;
+    background:linear-gradient(135deg,#f0f4fb,#e8eef8);
+    border-top:1px solid var(--border);
+    color:var(--text-muted); font-size:13px;
+  }
+  .footer strong { color:var(--text-dim); }
+
+  /* ── Decision table inside stage ── */
+  .inner-table { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:18px; }
+  .inner-table th { padding:7px 10px; background:var(--bg2); border:1px solid var(--border); text-align:left; color:var(--text-muted); }
+  .inner-table td { padding:7px 10px; border:1px solid var(--border); color:var(--text-dim); background:var(--surface); }
+  .inner-table tr:hover td { background:var(--surface2); }
+
+  /* ── MLOps levels ── */
+  .level-bar { display:flex; flex-direction:column; gap:7px; margin-bottom:18px; }
+  .level-item {
+    padding:9px 13px; background:var(--surface); border-radius:8px;
+    border-left:3px solid; font-size:13px; color:var(--text-dim);
+    border-top:1px solid var(--border); border-right:1px solid var(--border); border-bottom:1px solid var(--border);
+  }
+  .level-item strong { color:var(--text); }
+
+  /* ── Eval layers ── */
+  .eval-layer {
+    padding:11px 13px; border-radius:8px; font-size:13px; margin-bottom:8px;
+    border:1px solid;
+  }
+  .eval-layer.tech   { background:rgba(59,130,246,0.05); border-color:rgba(59,130,246,0.15); }
+  .eval-layer.ux     { background:rgba(139,92,246,0.05); border-color:rgba(139,92,246,0.15); }
+  .eval-layer.biz    { background:rgba(16,185,129,0.05); border-color:rgba(16,185,129,0.15); }
+  .eval-layer .el    { font-weight:700; margin-bottom:3px; font-size:12.5px; }
+  .eval-layer.tech .el { color:#2563eb; }
+  .eval-layer.ux   .el { color:#7c3aed; }
+  .eval-layer.biz  .el { color:#059669; }
+  .eval-layer p { color:var(--text-dim); }
+
+  /* ── Pricing cards ── */
+  .price-item {
+    padding:9px 13px; background:var(--surface); border-radius:8px;
+    border:1px solid var(--border); font-size:13px; color:var(--text-dim); margin-bottom:7px;
+    box-shadow:0 1px 4px var(--shadow);
+  }
+  .price-item strong { color:#b45309; }
+</style>
+</head>
+<body>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+  <div class="hero-label">AI PM · 高级知识体系</div>
+  <h1>AI产品研发<br><span class="grad">全流程工作手册</span></h1>
+  <p class="hero-sub">从需求发现到商业化落地的完整方法论，聚焦互联网SaaS与智能制造两大行业，所有案例来自真实项目，可直接应用于实际工作。</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">7</div><div class="label">核心阶段</div></div>
+    <div class="hero-stat"><div class="num">12+</div><div class="label">行业案例</div></div>
+    <div class="hero-stat"><div class="num">40+</div><div class="label">主流工具</div></div>
+    <div class="hero-stat"><div class="num">2</div><div class="label">行业方向</div></div>
+  </div>
+  <a class="hero-cta" href="#workflow">开始探索 →</a>
+  <div class="hero-scroll"><span>向下滚动</span><span>↓</span></div>
+</section>
+
+<!-- ══ NAV ══ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-item active" href="#workflow">研发流程</a>
+    <a class="nav-item" href="#cases">行业案例</a>
+    <a class="nav-item" href="#tools">工具矩阵</a>
+    <a class="nav-item" href="#roles">团队角色</a>
+    <a class="nav-item" href="#kpi">评估指标</a>
+    <a class="nav-item" href="#pitfalls">常见陷阱</a>
+  </div>
+</nav>
+
+<!-- ══ WORKFLOW ══ -->
+<section class="section" id="workflow">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Phase 01–07</div>
+      <h2 class="section-title">AI产品研发 · 七大阶段</h2>
+      <p class="section-desc">点击每个阶段卡片展开详细操作清单、工具推荐与交付物</p>
+    </div>
+    <div class="pipeline">
+      <div class="pipeline-line"></div>
+
+      <!-- S1 -->
+      <div class="stage">
+        <div class="stage-dot" style="background:linear-gradient(135deg,#3b82f6,#6366f1);">01</div>
+        <div class="stage-card open" onclick="toggleStage(this)">
+          <div class="stage-head">
+            <div class="stage-icon">🔍</div>
+            <div class="stage-meta">
+              <div class="stage-num" style="color:#3b82f6;">Phase 01 · 需求发现与机会定义</div>
+              <div class="stage-name">Problem Discovery & Opportunity Sizing</div>
+              <div class="stage-brief">在投入任何资源之前，明确"AI是否真的是这个问题的最优解"，避免为了AI而AI。</div>
+              <div class="stage-tags">
+                <span class="tag">用户研究</span><span class="tag">竞品分析</span><span class="tag">ROI测算</span>
+                <span class="tag saas">互联网/SaaS</span><span class="tag mfg">制造/工业</span>
+              </div>
+            </div>
+            <div class="stage-chevron">▼</div>
+          </div>
+          <div class="stage-body">
+            <div class="stage-body-inner">
+              <div class="body-col">
+                <h4>核心操作清单</h4>
+                <ul class="checklist">
+                  <li><strong>问题界定</strong>：用5-Why逐层拆解，明确"是数据问题还是流程问题"</li>
+                  <li><strong>用户访谈</strong>：定性访谈20+目标用户，用痛点矩阵排序频率与严重程度</li>
+                  <li><strong>数据可行性评估</strong>：预判是否有足量高质训练数据，数据壁垒是否可突破</li>
+                  <li><strong>竞品AI能力地图</strong>：绘制竞品AI成熟度（Level 0–4），找差异化切入点</li>
+                  <li><strong>价值主张测试</strong>：用Landing Page或纸面原型验证用户是否愿意为AI功能付费</li>
+                  <li><strong>机会规模测算</strong>：TAM/SAM/SOM模型，结合AI渗透率假设计算可寻址市场</li>
+                </ul>
+              </div>
+              <div class="body-col">
+                <h4>关键工具</h4>
+                <div class="tools-grid" style="margin-bottom:18px;">
+                  <span class="tool-chip">Miro（需求地图）</span><span class="tool-chip">Dovetail（访谈分析）</span>
+                  <span class="tool-chip">Notion（知识库）</span><span class="tool-chip">Typeform（问卷）</span>
+                  <span class="tool-chip">ProductBoard</span><span class="tool-chip">Otter.ai（转录）</span>
+                </div>
+                <h4>阶段交付物</h4>
+                <div class="deliverables">
+                  <div class="deliverable"><span class="di">📋</span>AI机会评估报告（Problem Statement + AI Fit Analysis）</div>
+                  <div class="deliverable"><span class="di">🗺️</span>竞品AI能力地图</div>
+                  <div class="deliverable"><span class="di">📊</span>市场规模测算（TAM/SAM/SOM）</div>
+                  <div class="deliverable"><span class="di">✅</span>立项决策文档（Go/No-Go + 决策依据）</div>
+                </div>
+                <div class="alert-box"><strong>⚠️ 关键判断：</strong>AI仅适合<strong>有数据规律、有规模需求、人工成本高</strong>的场景。若数据量少或场景变化极快，规则系统往往优于AI模型。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S2 -->
+      <div class="stage">
+        <div class="stage-dot" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">02</div>
+        <div class="stage-card" onclick="toggleStage(this)">
+          <div class="stage-head">
+            <div class="stage-icon">🗄️</div>
+            <div class="stage-meta">
+              <div class="stage-num" style="color:#8b5cf6;">Phase 02 · 数据战略与数据工程</div>
+              <div class="stage-name">Data Strategy & Data Engineering</div>
+              <div class="stage-brief">数据是AI产品的"燃料"。数据质量决定模型上限，数据治理决定产品能否规模化。</div>
+              <div class="stage-tags">
+                <span class="tag">数据采集</span><span class="tag">数据标注</span>
+                <span class="tag">数据治理</span><span class="tag">特征工程</span>
+              </div>
+            </div>
+            <div class="stage-chevron">▼</div>
+          </div>
+          <div class="stage-body">
+            <div class="stage-body-inner">
+              <div class="body-col">
+                <h4>核心操作清单</h4>
+                <ul class="checklist">
+                  <li><strong>数据审计</strong>：盘点现有数据资产（量、质、覆盖度、时效性），输出缺口报告</li>
+                  <li><strong>数据采集方案</strong>：内部埋点 / 外部爬取 / 第三方购买 / UGC方案选型</li>
+                  <li><strong>标注流水线</strong>：设计标注任务SOP、工具选型、质量验收（Kappa系数≥0.8）</li>
+                  <li><strong>数据清洗规范</strong>：制定异常值、缺失值、重复数据处理标准，编写检查脚本</li>
+                  <li><strong>特征工程</strong>：领域专家+数据科学家协作挖掘强特征，建立特征仓库</li>
+                  <li><strong>数据合规</strong>：评估GDPR/个人信息保护法要求，制定脱敏与存储方案</li>
+                  <li><strong>数据飞轮设计</strong>：规划用户行为反馈如何自动回流训练管线</li>
+                </ul>
+              </div>
+              <div class="body-col">
+                <h4>关键工具</h4>
+                <div class="tools-grid" style="margin-bottom:18px;">
+                  <span class="tool-chip">Scale AI（标注）</span><span class="tool-chip">Labelbox</span>
+                  <span class="tool-chip">DVC（数据版本）</span><span class="tool-chip">Great Expectations</span>
+                  <span class="tool-chip">dbt（数据转换）</span><span class="tool-chip">Apache Airflow</span>
+                  <span class="tool-chip">Feast（特征存储）</span>
+                </div>
+                <h4>阶段交付物</h4>
+                <div class="deliverables">
+                  <div class="deliverable"><span class="di">📂</span>数据资产地图（Data Catalog）</div>
+                  <div class="deliverable"><span class="di">📝</span>数据标注规范手册（Annotation Guideline）</div>
+                  <div class="deliverable"><span class="di">🔄</span>数据Pipeline架构图</div>
+                  <div class="deliverable"><span class="di">⚖️</span>数据合规评估报告</div>
+                </div>
+                <div class="alert-box"><strong>⚠️ 制造业注意：</strong>工业数据存在<strong>时序性强、缺陷样本极少</strong>问题，需提前规划数据增强策略（旋转、噪声注入或GAN合成数据）。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="stage">
+        <div class="stage-dot" style="background:linear-gradient(135deg,#8b5cf6,#a855f7);">03</div>
+        <div class="stage-card" onclick="toggleStage(this)">
+          <div class="stage-head">
+            <div class="stage-icon">🧠</div>
+            <div class="stage-meta">
+              <div class="stage-num" style="color:#a855f7;">Phase 03 · AI模型选型与研发</div>
+              <div class="stage-name">Model Selection & AI Development</div>
+              <div class="stage-brief">在"自研 vs. 调用API vs. 微调开源模型"之间做出符合商业逻辑的技术决策。</div>
+              <div class="stage-tags">
+                <span class="tag">模型评估</span><span class="tag">Fine-tuning</span>
+                <span class="tag">RAG架构</span><span class="tag">Prompt工程</span>
+              </div>
+            </div>
+            <div class="stage-chevron">▼</div>
+          </div>
+          <div class="stage-body">
+            <div class="stage-body-inner">
+              <div class="body-col">
+                <h4>核心操作清单</h4>
+                <ul class="checklist">
+                  <li><strong>基线方案</strong>：先用最简单的规则/统计方法建立Baseline作为比较基准</li>
+                  <li><strong>技术路线决策</strong>：自研（数据量大、高度定制）/ API（快速验证）/ 开源微调（平衡成本）</li>
+                  <li><strong>模型评估框架</strong>：确定指标（Accuracy/F1/BLEU/NDCG等），建立自动化评估脚本</li>
+                  <li><strong>Prompt工程（LLM）</strong>：Few-shot、CoT、System Prompt设计与A/B测试</li>
+                  <li><strong>RAG架构设计</strong>：向量数据库选型、分块策略、检索增强配置</li>
+                  <li><strong>微调策略</strong>：LoRA / QLoRA参数高效微调；RLHF对齐用户偏好</li>
+                  <li><strong>安全与伦理</strong>：偏见检测、幻觉率测试、对抗样本测试</li>
+                  <li><strong>成本建模</strong>：推理成本（Token/请求）建模，计算盈亏平衡点</li>
+                </ul>
+              </div>
+              <div class="body-col">
+                <h4>技术路线决策矩阵</h4>
+                <table class="inner-table" style="margin-bottom:18px;">
+                  <tr><th>方案</th><th>适用场景</th><th>周期</th></tr>
+                  <tr><td style="color:#2563eb;font-weight:600;">API调用</td><td>快速验证、通用语言任务</td><td>1–4周</td></tr>
+                  <tr><td style="color:#7c3aed;font-weight:600;">开源微调</td><td>垂直领域、数据私密</td><td>2–12周</td></tr>
+                  <tr><td style="color:#059669;font-weight:600;">自研训练</td><td>数据壁垒强、高定制化</td><td>3–12月</td></tr>
+                </table>
+                <h4>关键工具</h4>
+                <div class="tools-grid">
+                  <span class="tool-chip">HuggingFace</span><span class="tool-chip">PyTorch / JAX</span>
+                  <span class="tool-chip">OpenAI API</span><span class="tool-chip">Anthropic API</span>
+                  <span class="tool-chip">LangChain</span><span class="tool-chip">LlamaIndex</span>
+                  <span class="tool-chip">Pinecone</span><span class="tool-chip">W&B</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="stage">
+        <div class="stage-dot" style="background:linear-gradient(135deg,#ec4899,#f43f5e);">04</div>
+        <div class="stage-card" onclick="toggleStage(this)">
+          <div class="stage-head">
+            <div class="stage-icon">🎨</div>
+            <div class="stage-meta">
+              <div class="stage-num" style="color:#ec4899;">Phase 04 · 产品设计与人机交互</div>
+              <div class="stage-name">Product Design & Human-AI Interaction</div>
+              <div class="stage-brief">AI产品UX需解决"不确定性呈现"与"用户信任建立"两大核心挑战。</div>
+              <div class="stage-tags">
+                <span class="tag">HAI设计</span><span class="tag">可解释性</span>
+                <span class="tag">原型验证</span><span class="tag">反馈机制</span>
+              </div>
+            </div>
+            <div class="stage-chevron">▼</div>
+          </div>
+          <div class="stage-body">
+            <div class="stage-body-inner">
+              <div class="body-col">
+                <h4>核心操作清单</h4>
+                <ul class="checklist">
+                  <li><strong>AI能力边界设计</strong>：明确AI"能做/不能做/不确定"的三态呈现方案</li>
+                  <li><strong>置信度可视化</strong>：将模型置信度转化为用户可理解的界面语言（警告、人工兜底）</li>
+                  <li><strong>反馈闭环设计</strong>：设计"点赞/踩、纠错、举报"等反馈组件，构建数据飞轮入口</li>
+                  <li><strong>Human-in-the-Loop</strong>：界定哪些决策必须人工确认（医疗、金融等高风险场景）</li>
+                  <li><strong>渐进式信任</strong>：先展示AI推荐，再逐步减少摩擦（参考Google Maps演进路径）</li>
+                  <li><strong>错误恢复设计</strong>：AI出错时的降级方案（Fallback UI），避免用户挫败感</li>
+                  <li><strong>可用性测试</strong>：5名用户发现80%可用性问题，重点测试AI输出的理解度</li>
+                </ul>
+              </div>
+              <div class="body-col">
+                <h4>关键工具</h4>
+                <div class="tools-grid" style="margin-bottom:18px;">
+                  <span class="tool-chip">Figma（设计原型）</span><span class="tool-chip">Maze（用户测试）</span>
+                  <span class="tool-chip">FullStory（行为录制）</span><span class="tool-chip">Hotjar（热力图）</span>
+                  <span class="tool-chip">Storybook（组件库）</span>
+                </div>
+                <h4>阶段交付物</h4>
+                <div class="deliverables">
+                  <div class="deliverable"><span class="di">🖥️</span>交互原型（含AI异常态设计）</div>
+                  <div class="deliverable"><span class="di">📐</span>HAI设计规范文档</div>
+                  <div class="deliverable"><span class="di">🧪</span>可用性测试报告（5+用户洞察）</div>
+                  <div class="deliverable"><span class="di">🔄</span>用户反馈闭环流程图</div>
+                </div>
+                <div class="alert-box"><strong>⚠️ Google HAI指南：</strong>AI产品应让用户<strong>随时可控（随时纠正/关闭）</strong>，不应让用户感到被AI"绑架"。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 -->
+      <div class="stage">
+        <div class="stage-dot" style="background:linear-gradient(135deg,#f59e0b,#f97316);">05</div>
+        <div class="stage-card" onclick="toggleStage(this)">
+          <div class="stage-head">
+            <div class="stage-icon">⚙️</div>
+            <div class="stage-meta">
+              <div class="stage-num" style="color:#f59e0b;">Phase 05 · 工程化与MLOps</div>
+              <div class="stage-name">Engineering & MLOps</div>
+              <div class="stage-brief">将"能跑的模型"变成"生产级AI系统"，需要完善的MLOps体系支撑持续迭代。</div>
+              <div class="stage-tags">
+                <span class="tag">CI/CD</span><span class="tag">模型监控</span>
+                <span class="tag">灰度发布</span><span class="tag">性能优化</span>
+              </div>
+            </div>
+            <div class="stage-chevron">▼</div>
+          </div>
+          <div class="stage-body">
+            <div class="stage-body-inner">
+              <div class="body-col">
+                <h4>核心操作清单</h4>
+                <ul class="checklist">
+                  <li><strong>模型服务化</strong>：REST API / gRPC封装，定义输入输出Schema，版本化管理</li>
+                  <li><strong>推理优化</strong>：量化（INT8/FP16）、蒸馏、ONNX转换，降低延迟与推理成本</li>
+                  <li><strong>CI/CD for ML</strong>：代码变更自动触发模型重训练、评估、A/B测试流水线</li>
+                  <li><strong>数据漂移监控</strong>：实时检测输入数据分布变化（Data Drift），触发重训警告</li>
+                  <li><strong>模型衰减监控</strong>：追踪线上关键指标（精确率/召回率/业务KPI），设置告警</li>
+                  <li><strong>灰度发布</strong>：Canary Release（5%→20%→50%→100%），配合指标验证</li>
+                  <li><strong>降级兜底</strong>：模型超时/异常时自动切换至规则引擎或上一版本</li>
+                </ul>
+              </div>
+              <div class="body-col">
+                <h4>MLOps成熟度等级</h4>
+                <div class="level-bar">
+                  <div class="level-item" style="border-left-color:#94a3b8;"><strong>L0 · 手动流程</strong> — 脚本手跑，无版本管理，不可重现</div>
+                  <div class="level-item" style="border-left-color:#3b82f6;"><strong>L1 · ML Pipeline</strong> — 训练流水线自动化，模型版本管理</div>
+                  <div class="level-item" style="border-left-color:#8b5cf6;"><strong>L2 · CI/CD for ML</strong> — 代码→训练→评估→部署全自动</div>
+                  <div class="level-item" style="border-left-color:#10b981;"><strong>L3 · 自适应系统</strong> — 数据漂移自动触发重训，持续学习</div>
+                </div>
+                <h4>关键工具</h4>
+                <div class="tools-grid">
+                  <span class="tool-chip">MLflow</span><span class="tool-chip">Kubeflow</span>
+                  <span class="tool-chip">AWS SageMaker</span><span class="tool-chip">Azure ML</span>
+                  <span class="tool-chip">Evidently AI</span><span class="tool-chip">Triton Server</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S6 -->
+      <div class="stage">
+        <div class="stage-dot" style="background:linear-gradient(135deg,#10b981,#059669);">06</div>
+        <div class="stage-card" onclick="toggleStage(this)">
+          <div class="stage-head">
+            <div class="stage-icon">🧪</div>
+            <div class="stage-meta">
+              <div class="stage-num" style="color:#10b981;">Phase 06 · 测试、评估与安全上线</div>
+              <div class="stage-name">Testing, Evaluation & Safe Launch</div>
+              <div class="stage-brief">AI产品测试远比传统软件复杂——需同时验证技术指标、用户体验和业务价值。</div>
+              <div class="stage-tags">
+                <span class="tag">A/B测试</span><span class="tag">离线评估</span>
+                <span class="tag">安全审查</span><span class="tag">压力测试</span>
+              </div>
+            </div>
+            <div class="stage-chevron">▼</div>
+          </div>
+          <div class="stage-body">
+            <div class="stage-body-inner">
+              <div class="body-col">
+                <h4>核心操作清单</h4>
+                <ul class="checklist">
+                  <li><strong>离线评估</strong>：在黄金测试集上验证核心模型指标，设定上线准入门槛</li>
+                  <li><strong>Shadow Mode</strong>：新旧模型并行运行对比输出差异，不影响线上用户</li>
+                  <li><strong>A/B实验设计</strong>：明确假设、最小样本量（统计显著性）、主指标/护栏指标</li>
+                  <li><strong>Red Team测试（LLM）</strong>：专项测试幻觉、越狱、有害内容、隐私泄露</li>
+                  <li><strong>负向案例库</strong>：收集并测试100+边缘案例，确保极端输入下行为可控</li>
+                  <li><strong>性能压测</strong>：模拟峰值流量，验证P99延迟、QPS、服务稳定性</li>
+                  <li><strong>回滚预案</strong>：制定回滚触发条件，确保5分钟内可回滚至上一版本</li>
+                </ul>
+              </div>
+              <div class="body-col">
+                <h4>三层评估框架</h4>
+                <div class="eval-layer tech"><div class="el">🔬 技术层指标</div><p>Accuracy / F1 / Latency / Throughput / Memory</p></div>
+                <div class="eval-layer ux"><div class="el">👤 用户体验层</div><p>任务完成率 / 满意度NPS / 功能使用率 / 报错率</p></div>
+                <div class="eval-layer biz"><div class="el">💼 业务层指标</div><p>转化率 / 留存率 / ROI / 成本节约 / 收入增量</p></div>
+                <div style="margin-top:14px;"></div>
+                <h4>关键工具</h4>
+                <div class="tools-grid">
+                  <span class="tool-chip">Statsig（实验）</span><span class="tool-chip">LaunchDarkly</span>
+                  <span class="tool-chip">Amplitude</span><span class="tool-chip">Grafana</span>
+                  <span class="tool-chip">Garak（LLM安全）</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S7 -->
+      <div class="stage">
+        <div class="stage-dot" style="background:linear-gradient(135deg,#0ea5e9,#10b981);">07</div>
+        <div class="stage-card" onclick="toggleStage(this)">
+          <div class="stage-head">
+            <div class="stage-icon">🚀</div>
+            <div class="stage-meta">
+              <div class="stage-num" style="color:#0ea5e9;">Phase 07 · 商业化运营与持续迭代</div>
+              <div class="stage-name">Commercialization & Continuous Iteration</div>
+              <div class="stage-brief">AI产品的价值在上线后才真正开始创造，构建持续学习与优化的正向飞轮。</div>
+              <div class="stage-tags">
+                <span class="tag">数据飞轮</span><span class="tag">定价策略</span>
+                <span class="tag">持续学习</span><span class="tag">规模化</span>
+              </div>
+            </div>
+            <div class="stage-chevron">▼</div>
+          </div>
+          <div class="stage-body">
+            <div class="stage-body-inner">
+              <div class="body-col">
+                <h4>核心操作清单</h4>
+                <ul class="checklist">
+                  <li><strong>GTM策略</strong>：Beta用户招募、分层灰度、使用激励方案设计</li>
+                  <li><strong>AI功能定价</strong>：基于价值定价（WTP评估），而非成本加成定价</li>
+                  <li><strong>数据飞轮运营</strong>：分析用户纠错/反馈数据，每2–4周回流至训练管线</li>
+                  <li><strong>AI解释性运营</strong>：向用户/监管方解释AI决策依据（金融/医疗合规要求）</li>
+                  <li><strong>客户成功</strong>：企业客户配合落地培训，制定"AI效益量化报告"增强续费</li>
+                  <li><strong>规模化策略</strong>：多租户隔离、私有化部署选项、API扩展能力建设</li>
+                  <li><strong>版本迭代节奏</strong>：区分"模型更新"与"产品更新"的发布节奏管理</li>
+                </ul>
+              </div>
+              <div class="body-col">
+                <h4>AI产品定价模型</h4>
+                <div class="price-item"><strong>用量计费</strong> — 按Token/API调用/分析次数（适合LLM、分析类产品）</div>
+                <div class="price-item"><strong>价值分成</strong> — 按AI带来的成本节约或收入增量分成（适合工业场景）</div>
+                <div class="price-item"><strong>席位订阅</strong> — 按用户数/席位收取固定月费（适合协作类SaaS）</div>
+                <div style="margin-top:14px;"></div>
+                <h4>关键工具</h4>
+                <div class="tools-grid">
+                  <span class="tool-chip">Amplitude</span><span class="tool-chip">Mixpanel</span>
+                  <span class="tool-chip">Stripe（计费）</span><span class="tool-chip">Intercom</span>
+                  <span class="tool-chip">Tableau（BI）</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ CASES ══ -->
+<section class="section alt" id="cases">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Real Cases</div>
+      <h2 class="section-title">行业真实案例参考</h2>
+      <p class="section-desc">所有案例均来自已公开的企业实践，数据来源于官方报告、技术博客及公开媒体报道</p>
+    </div>
+    <div class="cases-tabs">
+      <div class="case-tab saas active" onclick="switchTab('saas')">🌐 互联网 / SaaS</div>
+      <div class="case-tab mfg" onclick="switchTab('mfg')">🏭 制造 / 工业</div>
+    </div>
+
+    <div class="case-panel active" id="panel-saas">
+      <div class="cases-grid">
+        <!-- GitHub Copilot -->
+        <div class="case-card saas">
+          <div class="case-header">
+            <div class="case-logo saas">🐙</div>
+            <div><div class="case-company">GitHub · Microsoft</div><div class="case-product">GitHub Copilot — AI代码助手</div></div>
+          </div>
+          <div class="case-body">
+            <div class="case-section"><div class="case-label saas">核心问题</div><div class="case-text">开发者编写样板代码效率低，文档查阅频繁切换上下文，影响"心流"状态。</div></div>
+            <div class="case-section"><div class="case-label saas">技术路线</div><div class="case-text">基于OpenAI Codex（GPT-3衍生）进行代码专项预训练，使用GitHub公开代码仓库（54种编程语言）作为训练语料，集成至VS Code插件，2023年升级至GPT-4底座，新增对话式代码生成（Copilot Chat）。</div></div>
+            <div class="case-section"><div class="case-label saas">工作流关键决策</div><div class="case-text">① 先做Technical Preview收集10万+开发者反馈后再商业化；② 定价$10/月个人，席位订阅降低决策摩擦；③ 以"代码接受率"（Acceptance Rate）作为核心产品指标驱动模型迭代。</div></div>
+            <div class="case-metrics">
+              <div class="metric"><div class="metric-val saas">55%</div><div class="metric-key">代码AI生成占比</div></div>
+              <div class="metric"><div class="metric-val saas">74%</div><div class="metric-key">开发者满意度</div></div>
+              <div class="metric"><div class="metric-val saas">$100M+</div><div class="metric-key">2023年ARR</div></div>
+            </div>
+            <div class="case-timeline">
+              <div class="tl-step"><div class="tl-dot saas"></div><div class="tl-label">2021.6<br>技术预览</div></div>
+              <div class="tl-step"><div class="tl-dot saas"></div><div class="tl-label">2022.6<br>正式发布</div></div>
+              <div class="tl-step"><div class="tl-dot saas"></div><div class="tl-label">2023.3<br>Copilot X</div></div>
+              <div class="tl-step"><div class="tl-dot saas"></div><div class="tl-label">2024<br>企业版</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- Notion AI -->
+        <div class="case-card saas">
+          <div class="case-header">
+            <div class="case-logo saas">📝</div>
+            <div><div class="case-company">Notion Labs</div><div class="case-product">Notion AI — 知识库AI写作助手</div></div>
+          </div>
+          <div class="case-body">
+            <div class="case-section"><div class="case-label saas">核心问题</div><div class="case-text">知识工作者面临空白页焦虑、信息整合耗时、跨文档洞察难等高频痛点。</div></div>
+            <div class="case-section"><div class="case-label saas">技术路线</div><div class="case-text">API调用GPT-4及Anthropic Claude，构建Notion专属Prompt模板库（30+动作），2023年推出"Ask AI"基于RAG架构支持对工作区文档的自然语言问答。</div></div>
+            <div class="case-section"><div class="case-label saas">工作流关键决策</div><div class="case-text">① "加法策略"：AI作为编辑器的增强插件而非替代品；② Waitlist预热收集10万+用户需求，精准规划功能优先级；③ $10/月单独订阅或企业套餐捆绑。</div></div>
+            <div class="case-metrics">
+              <div class="metric"><div class="metric-val saas">400万+</div><div class="metric-key">AI功能用户</div></div>
+              <div class="metric"><div class="metric-val saas">30+</div><div class="metric-key">AI功能动作</div></div>
+              <div class="metric"><div class="metric-val saas">2周</div><div class="metric-key">概念到灰度</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- Salesforce Einstein -->
+        <div class="case-card saas">
+          <div class="case-header">
+            <div class="case-logo saas">☁️</div>
+            <div><div class="case-company">Salesforce</div><div class="case-product">Einstein GPT — 企业CRM AI平台</div></div>
+          </div>
+          <div class="case-body">
+            <div class="case-section"><div class="case-label saas">核心问题</div><div class="case-text">销售/客服人员每天处理海量客户数据，CRM录入耗时，线索评分依赖经验，跟进邮件写作低效。</div></div>
+            <div class="case-section"><div class="case-label saas">技术路线</div><div class="case-text">构建Einstein AI平台层，集成OpenAI GPT-4及自研预测模型，提供Lead Scoring（历史CRM数据训练）、Email Generator（RAG召回客户上下文生成个性化邮件）、Case Summarization（客服工单自动摘要）等垂直功能。</div></div>
+            <div class="case-section"><div class="case-label saas">工作流关键决策</div><div class="case-text">① 数据隔离承诺：每家企业数据独立训练，解决数据安全顾虑；② 效果可量化：以"商机预测准确率提升"为核心ROI驱动企业采购。</div></div>
+            <div class="case-metrics">
+              <div class="metric"><div class="metric-val saas">28%</div><div class="metric-key">销售效率提升</div></div>
+              <div class="metric"><div class="metric-val saas">$500B+</div><div class="metric-key">AI交易价值</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- Slack AI -->
+        <div class="case-card saas">
+          <div class="case-header">
+            <div class="case-logo saas">💬</div>
+            <div><div class="case-company">Slack · Salesforce</div><div class="case-product">Slack AI — 对话式工作区智能</div></div>
+          </div>
+          <div class="case-body">
+            <div class="case-section"><div class="case-label saas">核心问题</div><div class="case-text">员工每天被海量消息淹没，重要信息容易遗漏，新人加入时历史上下文难以快速获取。</div></div>
+            <div class="case-section"><div class="case-label saas">技术路线</div><div class="case-text">基于LLM实现频道摘要（Channel Recap）、线程摘要（Thread Summary）、智能搜索（Search Answers）。关键：对话历史RAG检索 + 严格权限管控（只摘要有权限查看的内容）。</div></div>
+            <div class="case-section"><div class="case-label saas">工作流关键决策</div><div class="case-text">① 隐私优先：严格遵循现有权限体系，不泄露用户无权访问内容；② $10/用户/月附加包；③ 从摘要切入而非生成，降低AI幻觉风险。</div></div>
+            <div class="case-metrics">
+              <div class="metric"><div class="metric-val saas">97分钟</div><div class="metric-key">日均节省时间</div></div>
+              <div class="metric"><div class="metric-val saas">2024.2</div><div class="metric-key">正式上线</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="case-panel" id="panel-mfg">
+      <div class="cases-grid">
+        <!-- Foxconn -->
+        <div class="case-card mfg">
+          <div class="case-header">
+            <div class="case-logo mfg">🔬</div>
+            <div><div class="case-company">富士康 Foxconn</div><div class="case-product">AOI视觉缺陷检测系统</div></div>
+          </div>
+          <div class="case-body">
+            <div class="case-section"><div class="case-label mfg">核心问题</div><div class="case-text">PCB板与电子元器件外观质检依赖人工，漏检率约0.3–1%，人力成本高，检测员疲劳导致质量波动。</div></div>
+            <div class="case-section"><div class="case-label mfg">技术路线</div><div class="case-text">基于工业相机采集高分辨率图像，使用CNN（ResNet/EfficientNet）进行缺陷分类检测；针对缺陷样本稀少问题，采用GAN生成合成缺陷图像扩充训练集（200张→2万张）；部署NVIDIA Jetson AGX边缘推理设备，延迟≤50ms。</div></div>
+            <div class="case-section"><div class="case-label mfg">工作流关键决策</div><div class="case-text">① 数据飞轮：每条产线漏检/误检案例自动回流标注队列，每月重训；② 人机协作：低置信度样本路由至人工复检而非全自动判废；③ 从良率最低产线试点，快速出ROI后横向推广。</div></div>
+            <div class="case-metrics">
+              <div class="metric"><div class="metric-val mfg">99.7%</div><div class="metric-key">检测准确率</div></div>
+              <div class="metric"><div class="metric-val mfg">60%</div><div class="metric-key">人工成本降低</div></div>
+              <div class="metric"><div class="metric-val mfg">50ms</div><div class="metric-key">单件检测延迟</div></div>
+            </div>
+            <div class="case-timeline">
+              <div class="tl-step"><div class="tl-dot mfg"></div><div class="tl-label">数据采集<br>标注</div></div>
+              <div class="tl-step"><div class="tl-dot mfg"></div><div class="tl-label">GAN数据<br>增强</div></div>
+              <div class="tl-step"><div class="tl-dot mfg"></div><div class="tl-label">试点产线<br>验证</div></div>
+              <div class="tl-step"><div class="tl-dot mfg"></div><div class="tl-label">全厂推广<br>飞轮运营</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- Siemens -->
+        <div class="case-card mfg">
+          <div class="case-header">
+            <div class="case-logo mfg">⚡</div>
+            <div><div class="case-company">Siemens</div><div class="case-product">MindSphere · 工业AI预测性维护</div></div>
+          </div>
+          <div class="case-body">
+            <div class="case-section"><div class="case-label mfg">核心问题</div><div class="case-text">工业设备（电机、压缩机、CNC机床）突发故障造成的非计划停机，一次停机损失可达数十万至数百万元。</div></div>
+            <div class="case-section"><div class="case-label mfg">技术路线</div><div class="case-text">从设备传感器（振动、温度、电流、转速）采集时序数据，使用LSTM时序模型 + Isolation Forest异常检测构建设备健康评分（0–100），在故障发生前3–7天触发维护预警，集成数字孪生模拟故障传播路径。</div></div>
+            <div class="case-section"><div class="case-label mfg">工作流关键决策</div><div class="case-text">① 修复性→预防性→预测性三级演进路径，先跑通数据链路再上AI；② 与客户共同定义"健康评分阈值"确保工程师信任告警；③ 基于"避免一次停机"价值分成定价。</div></div>
+            <div class="case-metrics">
+              <div class="metric"><div class="metric-val mfg">35%</div><div class="metric-key">非计划停机减少</div></div>
+              <div class="metric"><div class="metric-val mfg">20%</div><div class="metric-key">维护成本降低</div></div>
+              <div class="metric"><div class="metric-val mfg">3–7天</div><div class="metric-key">提前预警周期</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- Bosch -->
+        <div class="case-card mfg">
+          <div class="case-header">
+            <div class="case-logo mfg">🔧</div>
+            <div><div class="case-company">Bosch</div><div class="case-product">AI过程质量控制系统</div></div>
+          </div>
+          <div class="case-body">
+            <div class="case-section"><div class="case-label mfg">核心问题</div><div class="case-text">汽车零部件制造工艺参数复杂，良率波动难以定位根因，传统SPC无法识别多参数交叉影响。</div></div>
+            <div class="case-section"><div class="case-label mfg">技术路线</div><div class="case-text">采集注塑/焊接/装配工序的全量过程参数（200+维），使用XGBoost + SHAP可解释性框架构建良率预测模型，向操作员解释"当前批次良率低的主要原因是哪3个参数异常"，集成Bosch IoT Suite与MES实时调参建议。</div></div>
+            <div class="case-section"><div class="case-label mfg">工作流关键决策</div><div class="case-text">① SHAP可解释性是采纳关键：操作员拒绝黑盒建议，可视化解释让工程师信任AI；② 初期"建议模式"而非"自动调整模式"，积累信任后逐步自动化。</div></div>
+            <div class="case-metrics">
+              <div class="metric"><div class="metric-val mfg">15%</div><div class="metric-key">良率提升</div></div>
+              <div class="metric"><div class="metric-val mfg">40%</div><div class="metric-key">根因定位加速</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- FANUC -->
+        <div class="case-card mfg">
+          <div class="case-header">
+            <div class="case-logo mfg">🤖</div>
+            <div><div class="case-company">FANUC · Preferred Networks</div><div class="case-product">ZDT · 机器人零停机系统</div></div>
+          </div>
+          <div class="case-body">
+            <div class="case-section"><div class="case-label mfg">核心问题</div><div class="case-text">工业机器人（尤其汽车焊接线）突发故障导致整条产线停机，停线1小时损失可达数十万元。</div></div>
+            <div class="case-section"><div class="case-label mfg">技术路线</div><div class="case-text">FANUC联合Preferred Networks构建ZDT云平台：将全球数万台FANUC机器人运行数据汇入云端，通过联邦学习在不暴露原始数据的前提下训练统一故障预测模型（LSTM + 自编码器异常检测）。</div></div>
+            <div class="case-section"><div class="case-label mfg">工作流关键决策</div><div class="case-text">① 联邦学习解决数据孤岛：数据不出厂，共享模型梯度，FANUC获得全量训练效果；② 接入机器人越多模型越准，形成强数据网络效应壁垒；③ ZDT订阅与机器人销售捆绑，形成高毛利服务收入。</div></div>
+            <div class="case-metrics">
+              <div class="metric"><div class="metric-val mfg">数万台</div><div class="metric-key">接入机器人</div></div>
+              <div class="metric"><div class="metric-val mfg">联邦学习</div><div class="metric-key">数据隐私保护</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ TOOLS ══ -->
+<section class="section" id="tools">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Toolstack</div>
+      <h2 class="section-title">主流工具矩阵</h2>
+      <p class="section-desc">按研发阶段分类的工具选型参考，覆盖从数据到生产的全链路</p>
+    </div>
+    <div class="tools-matrix">
+      <div class="tool-cat">
+        <div class="tool-cat-header"><div class="tool-cat-icon">📊</div><div class="tool-cat-name">数据标注与管理</div></div>
+        <div class="tool-list">
+          <div class="tool-item"><span class="tool-name">Scale AI</span><span class="tool-desc">企业级标注平台</span></div>
+          <div class="tool-item"><span class="tool-name">Labelbox</span><span class="tool-desc">多模态标注</span></div>
+          <div class="tool-item"><span class="tool-name">Roboflow</span><span class="tool-desc">视觉数据管理</span></div>
+          <div class="tool-item"><span class="tool-name">DVC</span><span class="tool-desc">数据版本控制</span></div>
+          <div class="tool-item"><span class="tool-name">Great Expectations</span><span class="tool-desc">数据质量校验</span></div>
+        </div>
+      </div>
+      <div class="tool-cat">
+        <div class="tool-cat-header"><div class="tool-cat-icon">🧠</div><div class="tool-cat-name">模型训练与框架</div></div>
+        <div class="tool-list">
+          <div class="tool-item"><span class="tool-name">PyTorch</span><span class="tool-desc">主流深度学习框架</span></div>
+          <div class="tool-item"><span class="tool-name">HuggingFace</span><span class="tool-desc">预训练模型库</span></div>
+          <div class="tool-item"><span class="tool-name">JAX</span><span class="tool-desc">Google高性能训练</span></div>
+          <div class="tool-item"><span class="tool-name">LangChain</span><span class="tool-desc">LLM应用编排</span></div>
+          <div class="tool-item"><span class="tool-name">LlamaIndex</span><span class="tool-desc">RAG构建框架</span></div>
+        </div>
+      </div>
+      <div class="tool-cat">
+        <div class="tool-cat-header"><div class="tool-cat-icon">🤖</div><div class="tool-cat-name">基础模型API</div></div>
+        <div class="tool-list">
+          <div class="tool-item"><span class="tool-name">OpenAI GPT-4o</span><span class="tool-desc">通用LLM首选</span></div>
+          <div class="tool-item"><span class="tool-name">Anthropic Claude</span><span class="tool-desc">安全性/长上下文</span></div>
+          <div class="tool-item"><span class="tool-name">Google Gemini</span><span class="tool-desc">多模态/企业集成</span></div>
+          <div class="tool-item"><span class="tool-name">Meta LLaMA 3</span><span class="tool-desc">开源部署</span></div>
+          <div class="tool-item"><span class="tool-name">Mistral</span><span class="tool-desc">高效开源欧洲合规</span></div>
+        </div>
+      </div>
+      <div class="tool-cat">
+        <div class="tool-cat-header"><div class="tool-cat-icon">📈</div><div class="tool-cat-name">实验追踪与评估</div></div>
+        <div class="tool-list">
+          <div class="tool-item"><span class="tool-name">Weights & Biases</span><span class="tool-desc">实验追踪首选</span></div>
+          <div class="tool-item"><span class="tool-name">MLflow</span><span class="tool-desc">开源实验管理</span></div>
+          <div class="tool-item"><span class="tool-name">Comet ML</span><span class="tool-desc">企业级追踪</span></div>
+          <div class="tool-item"><span class="tool-name">Ragas</span><span class="tool-desc">RAG评估框架</span></div>
+          <div class="tool-item"><span class="tool-name">DeepEval</span><span class="tool-desc">LLM评估框架</span></div>
+        </div>
+      </div>
+      <div class="tool-cat">
+        <div class="tool-cat-header"><div class="tool-cat-icon">☁️</div><div class="tool-cat-name">云ML平台</div></div>
+        <div class="tool-list">
+          <div class="tool-item"><span class="tool-name">AWS SageMaker</span><span class="tool-desc">AWS全托管ML</span></div>
+          <div class="tool-item"><span class="tool-name">Azure ML</span><span class="tool-desc">微软企业ML</span></div>
+          <div class="tool-item"><span class="tool-name">Google Vertex AI</span><span class="tool-desc">GCP ML平台</span></div>
+          <div class="tool-item"><span class="tool-name">阿里云PAI</span><span class="tool-desc">国内首选ML平台</span></div>
+          <div class="tool-item"><span class="tool-name">华为ModelArts</span><span class="tool-desc">国内工业场景</span></div>
+        </div>
+      </div>
+      <div class="tool-cat">
+        <div class="tool-cat-header"><div class="tool-cat-icon">🔍</div><div class="tool-cat-name">向量数据库（RAG）</div></div>
+        <div class="tool-list">
+          <div class="tool-item"><span class="tool-name">Pinecone</span><span class="tool-desc">托管向量库首选</span></div>
+          <div class="tool-item"><span class="tool-name">Weaviate</span><span class="tool-desc">开源多模态</span></div>
+          <div class="tool-item"><span class="tool-name">Chroma</span><span class="tool-desc">本地轻量级</span></div>
+          <div class="tool-item"><span class="tool-name">Milvus</span><span class="tool-desc">大规模生产级</span></div>
+          <div class="tool-item"><span class="tool-name">pgvector</span><span class="tool-desc">PostgreSQL扩展</span></div>
+        </div>
+      </div>
+      <div class="tool-cat">
+        <div class="tool-cat-header"><div class="tool-cat-icon">⚙️</div><div class="tool-cat-name">MLOps与监控</div></div>
+        <div class="tool-list">
+          <div class="tool-item"><span class="tool-name">Kubeflow</span><span class="tool-desc">K8s ML工作流</span></div>
+          <div class="tool-item"><span class="tool-name">Evidently AI</span><span class="tool-desc">数据/模型漂移监控</span></div>
+          <div class="tool-item"><span class="tool-name">Seldon Core</span><span class="tool-desc">模型服务化</span></div>
+          <div class="tool-item"><span class="tool-name">Grafana</span><span class="tool-desc">指标可视化监控</span></div>
+          <div class="tool-item"><span class="tool-name">Triton Inference</span><span class="tool-desc">GPU推理服务</span></div>
+        </div>
+      </div>
+      <div class="tool-cat">
+        <div class="tool-cat-header"><div class="tool-cat-icon">📐</div><div class="tool-cat-name">产品设计与实验</div></div>
+        <div class="tool-list">
+          <div class="tool-item"><span class="tool-name">Figma</span><span class="tool-desc">UI/UX设计原型</span></div>
+          <div class="tool-item"><span class="tool-name">Amplitude</span><span class="tool-desc">用户行为分析</span></div>
+          <div class="tool-item"><span class="tool-name">Statsig</span><span class="tool-desc">AB实验平台</span></div>
+          <div class="tool-item"><span class="tool-name">LaunchDarkly</span><span class="tool-desc">功能标志/灰度</span></div>
+          <div class="tool-item"><span class="tool-name">Dovetail</span><span class="tool-desc">用户研究管理</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ ROLES ══ -->
+<section class="section alt" id="roles">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Team Structure</div>
+      <h2 class="section-title">AI产品研发团队角色</h2>
+      <p class="section-desc">各角色在研发工作流中的核心职责与协作关系</p>
+    </div>
+    <div class="roles-grid">
+      <div class="role-card"><div class="role-icon">🎯</div><div class="role-title">AI产品经理</div><div class="role-resp">需求定义、机会识别、优先级决策、跨团队协作、商业化策略</div></div>
+      <div class="role-card"><div class="role-icon">🧮</div><div class="role-title">数据科学家</div><div class="role-resp">模型选型、特征工程、实验设计、模型评估与分析</div></div>
+      <div class="role-card"><div class="role-icon">🤖</div><div class="role-title">ML工程师</div><div class="role-resp">模型训练Pipeline、推理优化、MLOps体系建设</div></div>
+      <div class="role-card"><div class="role-icon">🗄️</div><div class="role-title">数据工程师</div><div class="role-resp">数据采集、ETL Pipeline、数据质量、特征存储建设</div></div>
+      <div class="role-card"><div class="role-icon">🎨</div><div class="role-title">UX设计师</div><div class="role-resp">人机交互设计、AI置信度可视化、用户测试、Fallback UI</div></div>
+      <div class="role-card"><div class="role-icon">💻</div><div class="role-title">应用工程师</div><div class="role-resp">API集成、前后端开发、系统集成、性能优化</div></div>
+      <div class="role-card"><div class="role-icon">🔒</div><div class="role-title">AI安全/合规</div><div class="role-resp">Red Team测试、偏见审查、隐私合规、模型伦理评估</div></div>
+      <div class="role-card"><div class="role-icon">🏭</div><div class="role-title">领域专家</div><div class="role-resp">（工业场景必须）工艺知识注入、标注质量把控、业务验收</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ KPI ══ -->
+<section class="section" id="kpi">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Metrics</div>
+      <h2 class="section-title">AI产品核心评估指标体系</h2>
+      <p class="section-desc">技术指标→用户指标→业务指标三层对齐框架</p>
+    </div>
+    <div style="overflow-x:auto; border-radius:14px; box-shadow:0 2px 16px var(--shadow);">
+      <table class="kpi-table">
+        <thead>
+          <tr>
+            <th>维度</th><th>指标</th><th>说明</th>
+            <th>互联网SaaS参考值</th><th>制造工业参考值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="4"><span class="kpi-badge tech">技术层</span></td>
+            <td>模型准确率/F1</td><td style="color:var(--text-dim);">离线测试集上的预测性能，是上线准入门槛</td>
+            <td style="color:var(--text-dim);">NLP任务 F1 ≥ 0.85</td><td style="color:var(--text-dim);">缺陷检测 Recall ≥ 0.98</td>
+          </tr>
+          <tr>
+            <td>推理延迟（P99）</td><td style="color:var(--text-dim);">99分位响应时间，影响用户感知与系统稳定性</td>
+            <td style="color:var(--text-dim);">≤ 500ms（实时交互）</td><td style="color:var(--text-dim);">≤ 100ms（产线实时）</td>
+          </tr>
+          <tr>
+            <td>模型漂移指标</td><td style="color:var(--text-dim);">输入数据分布偏移程度（PSI/KS检验），触发重训</td>
+            <td style="color:var(--text-dim);">PSI &gt; 0.2 触发告警</td><td style="color:var(--text-dim);">PSI &gt; 0.1 触发告警</td>
+          </tr>
+          <tr>
+            <td>幻觉率（LLM）</td><td style="color:var(--text-dim);">LLM输出中事实错误的比例，RAG可有效降低</td>
+            <td style="color:var(--text-dim);">目标 &lt; 5%（关键场景）</td><td style="color:var(--text-dim);">—</td>
+          </tr>
+          <tr>
+            <td rowspan="4"><span class="kpi-badge ux">用户层</span></td>
+            <td>功能采纳率</td><td style="color:var(--text-dim);">上线后30天内使用AI功能的活跃用户比例</td>
+            <td style="color:var(--text-dim);">目标 ≥ 30%（30天）</td><td style="color:var(--text-dim);">目标 ≥ 60%（操作员）</td>
+          </tr>
+          <tr>
+            <td>任务完成率</td><td style="color:var(--text-dim);">借助AI完成目标任务的用户比例（对比对照组）</td>
+            <td style="color:var(--text-dim);">提升 ≥ 10% vs 对照</td><td style="color:var(--text-dim);">提升 ≥ 15% vs 对照</td>
+          </tr>
+          <tr>
+            <td>AI建议接受率</td><td style="color:var(--text-dim);">用户接受AI推荐/建议的比例（GitHub Copilot核心指标）</td>
+            <td style="color:var(--text-dim);">Copilot约30–35%</td><td style="color:var(--text-dim);">维护建议接受率 ≥ 70%</td>
+          </tr>
+          <tr>
+            <td>满意度（CSAT/NPS）</td><td style="color:var(--text-dim);">用户对AI功能的主观满意度评分</td>
+            <td style="color:var(--text-dim);">NPS ≥ 30（AI功能专项）</td><td style="color:var(--text-dim);">操作员满意度 ≥ 4/5</td>
+          </tr>
+          <tr>
+            <td rowspan="4"><span class="kpi-badge biz">业务层</span></td>
+            <td>效率提升</td><td style="color:var(--text-dim);">AI自动化后人工时间节省百分比</td>
+            <td style="color:var(--text-dim);">目标 ≥ 20%（核心任务）</td><td style="color:var(--text-dim);">目标 ≥ 30%（重复工序）</td>
+          </tr>
+          <tr>
+            <td>AI功能收入贡献</td><td style="color:var(--text-dim);">AI功能带来的新增订阅/升级/ARPU提升</td>
+            <td style="color:var(--text-dim);">目标 ≥ 15% ARPU提升</td><td style="color:var(--text-dim);">服务收入年增长 ≥ 20%</td>
+          </tr>
+          <tr>
+            <td>成本节约ROI</td><td style="color:var(--text-dim);">AI投入产出比，分子：成本节约或收入增量</td>
+            <td style="color:var(--text-dim);">12个月ROI ≥ 150%</td><td style="color:var(--text-dim);">24个月ROI ≥ 200%</td>
+          </tr>
+          <tr>
+            <td>AI功能留存率</td><td style="color:var(--text-dim);">90天后仍持续使用AI功能的用户比例</td>
+            <td style="color:var(--text-dim);">目标 ≥ 40%（90天）</td><td style="color:var(--text-dim);">目标 ≥ 75%（持续集成）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ PITFALLS ══ -->
+<section class="section alt" id="pitfalls">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Anti-Patterns</div>
+      <h2 class="section-title">AI产品研发 · 高频陷阱与应对</h2>
+      <p class="section-desc">基于真实项目总结的常见失败模式，每一条都有对应解法</p>
+    </div>
+    <div class="pitfalls-grid">
+      <div class="pitfall-card red">
+        <div class="pitfall-icon">🎯</div>
+        <div class="pitfall-title">为AI而AI，不从业务问题出发</div>
+        <div class="pitfall-desc">团队为追赶潮流强行加入AI功能，但该场景本质是简单规则问题，AI带来额外复杂度却没有额外价值。典型案例：用ML预测"按钮颜色对转化率的影响"，A/B测试足以解决。</div>
+        <div class="pitfall-fix">✅ 应对：先建立规则Baseline，仅在规则无法解决、数据量足够、人工成本明显高于AI成本时才引入AI。</div>
+      </div>
+      <div class="pitfall-card red">
+        <div class="pitfall-icon">📊</div>
+        <div class="pitfall-title">忽视数据质量，过度关注模型算法</div>
+        <div class="pitfall-desc">"Garbage In, Garbage Out"是AI领域最古老的铁律，却仍是最常见的失败原因。花80%时间调模型，只花20%时间做数据清洗，结果模型在测试集好但线上一塌糊涂。</div>
+        <div class="pitfall-fix">✅ 应对：数据清洗与特征工程通常占项目70%工时，这是正常比例。宁可花2周清洗数据，不要花2个月调模型。</div>
+      </div>
+      <div class="pitfall-card yellow">
+        <div class="pitfall-icon">📈</div>
+        <div class="pitfall-title">只关注模型指标，不关注业务指标</div>
+        <div class="pitfall-desc">Accuracy提升了2%，但业务核心指标（转化率/GMV/良率）没有变化。模型优化和产品价值之间存在断层，无法说服业务方和高层继续投入。</div>
+        <div class="pitfall-fix">✅ 应对：立项时定义"北极星业务指标"，每次模型迭代必须说明预计对业务指标的影响量级，建立技术→业务指标映射关系。</div>
+      </div>
+      <div class="pitfall-card yellow">
+        <div class="pitfall-icon">🚀</div>
+        <div class="pitfall-title">跳过MVP直接做大而全系统</div>
+        <div class="pitfall-desc">在需求未充分验证的情况下，耗费6–12个月构建完整AI系统，上线后发现用户根本不买账，或核心假设有误，造成大量浪费。（制造业项目尤其常见）</div>
+        <div class="pitfall-fix">✅ 应对：先用最简单的方案验证产品假设，4–6周快速出POC，核心假设经用户验证后再投入规模化研发。</div>
+      </div>
+      <div class="pitfall-card purple">
+        <div class="pitfall-icon">🔒</div>
+        <div class="pitfall-title">低估数据合规与安全风险</div>
+        <div class="pitfall-desc">训练数据包含用户隐私信息却未脱敏，或LLM产品未做越狱防护，上线后遭遇合规处罚或公关危机。2023年多家企业因将用户数据输入ChatGPT API导致数据泄露。</div>
+        <div class="pitfall-fix">✅ 应对：立项阶段引入法务/合规评审；LLM产品必须配置内容过滤、PII识别脱敏、用户数据训练Opt-out等基础安全措施。</div>
+      </div>
+      <div class="pitfall-card purple">
+        <div class="pitfall-icon">👻</div>
+        <div class="pitfall-title">上线即终点，缺乏模型维护体系</div>
+        <div class="pitfall-desc">AI产品上线后团队就解散，没有监控体系、没有定期重训计划。模型因数据漂移逐渐"腐烂"，6个月后性能大幅下降，但团队毫不知情。</div>
+        <div class="pitfall-fix">✅ 应对：将"模型监控与维护"纳入研发交付物，明确重训触发条件、负责团队、预算预留（通常为首年开发成本的20–30%）。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+  <div class="container">
+    <p style="margin-bottom:8px;font-size:15px;"><strong>AI产品研发工作流知识体系</strong> · 2026年版</p>
+    <p style="margin-bottom:10px;color:var(--text-muted);">案例数据来源：GitHub官方博客、Salesforce产品发布、Siemens年报、FANUC技术白皮书、公开媒体报道</p>
+    <p style="color:var(--text-muted);">互联网/SaaS · 制造/工业 &nbsp;|&nbsp; 7大阶段 · 12+案例 · 40+工具</p>
+  </div>
+</footer>
+
+<script>
+function toggleStage(card) { card.classList.toggle('open'); }
+function switchTab(ind) {
+  document.querySelectorAll('.case-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.case-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.case-tab.'+ind).classList.add('active');
+  document.getElementById('panel-'+ind).classList.add('active');
+}
+const navItems = document.querySelectorAll('.nav-item');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  document.querySelectorAll('section[id]').forEach(s=>{
+    if(window.scrollY>=s.offsetTop-130) cur=s.id;
+  });
+  navItems.forEach(n=>{
+    n.classList.remove('active');
+    if(n.getAttribute('href')==='#'+cur) n.classList.add('active');
+  });
+});
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t) t.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+</script>
+</body>
+</html>
